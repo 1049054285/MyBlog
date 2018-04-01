@@ -1,0 +1,30 @@
+.article,.comment_list {
+    text-align: justify;
+    text-indent: 35px;
+    font-size: 18px;
+    background-color: white;
+    padding: 38px 30px;
+}
+.article .article_title {
+    font-size: 20px;
+    font-weight: bold;
+    color: #105cb6;
+}
+.info {
+    float: right;
+    margin: 35px 25px 35px 0;
+}
+.comment_bar {
+    margin-left: -30px;
+}
+.comment_bar .comment_item .list-group{
+    border-bottom: 2px solid rgba(0,0,0,.2);
+}
+.comment_item {
+    border-top: 2px solid rgba(0,0,0,.2);
+    border-left: 2px solid rgba(0,0,0,.2);
+    margin-left: 30px;
+}
+.comment_content a {
+    color: #105cb6;
+}

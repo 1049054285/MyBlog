@@ -1,0 +1,47 @@
+.article_list {
+    background-color: white;
+    min-height: 600px;
+}
+.article_item {
+    padding-top: 25px;
+    padding-bottom: 30px;
+}
+.article_list .container {
+    width: 95%;
+    margin: 0 auto;
+}
+.art_title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #105cb6;
+    text-decoration: underline;
+}
+.desc {
+    text-align: justify;
+    line-height: 1.8em;
+    margin-bottom: 5px;
+    color: #333;
+    overflow: hidden;
+    padding-right: 5px;
+    font-size: 15px;
+    padding-top: 5px;
+}
+.info {
+    float: right;
+    margin-right: 25px;
+}
+.info > * {
+    margin-left: 4px;
+}
+.info .username {
+    color: #105cb6;
+}
+.timer, .info {
+    font-size: 14px;
+}
+.timer {
+    color: #555;
+}
+.info {
+    margin-top: 10px;
+}

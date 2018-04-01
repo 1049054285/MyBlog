@@ -1,0 +1,67 @@
+<div class="div" id="comment_list">评论列表</div>
+<hr>
+{% for comment in comment_list_cur %}
+    <ul class="list-group">
+        <li class="list-group-item comment_info">
+            {% load my_tags %}
+{#            <a href="">#<span class="floor_num">{{ cur_page|multi:5|minus:5|add:forloop.counter }}</span>楼&nbsp;#}
+            <a href="">#<span class="floor_num">{{ comment.floor_num }}</span>楼&nbsp;
+            </a>
+            <span class="time">{{ comment.create_time|date:'Y-m-d H:i' }}&nbsp;</span>
+            <a id="nickname" href="/blog/{{ comment.user__blog__site }}">{{ comment.user__nickname }}</a>
+            <a class="pull-right reply_comment" href="#comment_cont" comment_id="{{ comment.nid }}">回复</a>
+            <a class="pull-right up_comment" href="###" comment_id="{{ comment.nid }}">点赞(<span
+                    id="up_comment_num_{{ comment.nid }}">{{ comment.up_count }}</span>)</a>
+            {% if comment.user == request.user %}
+                <a class="pull-right del_comment" href="###" comment_id="{{ comment.nid }}">删除</a>
+                <a class="pull-right edit_comment" href="###" comment_id="{{ comment.nid }}">编辑</a>
+            {% endif %}
+        </li>
+        <li class="list-group-item comment_content">
+{#            {% if comment.parent_comment %}#}
+{#                <div class="parent_content"><a href="###">@&nbsp;</a>{{ comment.parent_comment.user.nickname }}:&nbsp;&nbsp;&nbsp;{{ comment.parent_comment.content|linebreaksbr }}&nbsp;#}
+{#                </div>#}
+{#            {% endif %}#}
+            <div class="content">{{ comment.content|linebreaksbr }}&nbsp;</div>
+        </li>
+    </ul>
+{% endfor %}
+<ul class="pagination">
+    {% if comment_list_cur.has_previous %}
+        <li><a href="###"
+               url="/get_comment/?article_id={{ article.nid }}&page={{ comment_list_cur.previous_page_number }}#comment_list">上一页</a>
+        </li>
+    {% else %}
+        <li class="disabled"><a href="###">上一页</a></li>
+    {% endif %}
+
+    {% for num in p.page_range %}
+        {% if forloop.counter == cur_page %}
+            <li><a id="cur_page_a_tag" style="color: red"
+                   url="/get_comment/?article_id={{ article.nid }}&page={{ num }}#comment_list"
+                   href="###">{{ num }}</a></li>
+        {% elif forloop.counter < 3 %}
+            <li><a url="/get_comment/?article_id={{ article.nid }}&page={{ num }}#comment_list"
+                   href="###">{{ num }}</a></li>
+        {% elif forloop.counter|add:2 > p.num_pages %}
+            <li><a url="/get_comment/?article_id={{ article.nid }}&page={{ num }}#comment_list"
+                   href="###">{{ num }}</a></li>
+            {% load my_tags %}
+        {% elif forloop.counter <= cur_page|parseInt|add:2 and forloop.counter >= cur_page|parseInt|minus:2 %}
+            <li><a url="/get_comment/?article_id={{ article.nid }}&page={{ num }}#comment_list"
+                   href="###">{{ num }}</a></li>
+        {% elif forloop.counter == cur_page|parseInt|add:3 or forloop.counter == cur_page|parseInt|minus:3 %}
+            <li><span>. . .</span></li>
+        {% endif %}
+    {% endfor %}
+
+    {% if comment_list_cur.has_next %}
+        <li>
+            <a url="/get_comment/?article_id={{ article.nid }}&page={{ comment_list_cur.next_page_number }}#comment_list"
+               href="###">下一页</a>
+        </li>
+    {% else %}
+        <li class="disabled"><a href="###">下一页</a></li>
+    {% endif %}
+    <li><span>第 {{ cur_page }} 页</span></li>
+</ul>

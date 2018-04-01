@@ -1,0 +1,120 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{% static 'bs/css/bootstrap.css' %}">
+    <link rel="stylesheet" href="{% static 'css/reg.css' %}">
+    <script src="{% static 'bs/js/jquery-1.12.4.js' %}"></script>
+    <title>注册</title>
+</head>
+<body>
+<div class="container">
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+            <form>
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="id_username">用户名</label>
+                    {{ reg_form.username }}
+                    <span class="error_user"></span>
+                </div>
+                <div class="form-group">
+                    <label for="id_password">密码</label>
+                    {{ reg_form.password }}
+                    <span class="error_password"></span>
+                </div>
+                <div class="form-group">
+                    <label for="id_confirm_pwd">确认密码</label>
+                    {{ reg_form.confirm_pwd }}
+                    <span class="error_confirm_pwd"></span>
+                </div>
+                <div class="form-group">
+                    <label for="id_email">邮箱</label>
+                    {{ reg_form.email }}
+                    <span class="error_email"></span>
+                </div>
+                <div class="form-group">
+                    <label for="id_nickname">昵称</label>
+                    {{ reg_form.nickname }}
+                    <span class="error_nickname"></span>
+                </div>
+                <div class="form-group form-avatar">
+                    <label for="id_avatar">头像</label>
+                    <img src="/media/avatar/default.jpg" alt="" id="img_avatar">
+                    <input type="file" id="id_avatar">
+                    <span class="error_avatar"></span>
+                </div>
+                <div class="form-group">
+                    <label for="id_verification_code">验证码</label>
+                    <div class="row">
+                        <div class="col-md-7">
+                            {{ reg_form.verification_code }}
+                            <span class="error_verification_code"></span>
+                        </div>
+                        <div class="col-md-5">
+                            <img class="v_code" src="/get_verification_code/" alt="验证码" width="120" height="30"/>
+                            <a class="refresh">刷新</a>
+                        </div>
+                    </div>
+                </div>
+                <input id="reg" type="button" class="btn btn-default" value="注册">
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+    $('#id_avatar').change(function () {
+        var file = this.files[0];   //文件对象
+        var fr = new FileReader();
+        fr.readAsDataURL(file);
+        fr.onload = function(){
+            $('#img_avatar')[0].src = fr.result;
+        };
+    });
+
+    $('.refresh').click(function () {
+        $('.v_code')[0].src += '?';
+    });
+    $('#reg').click(function(){
+        $('form span').text('');
+        var formData = new FormData();
+        var username=$("#id_username").val();
+        var password=$("#id_password").val();
+        var confirm_pwd=$("#id_confirm_pwd").val();
+        var email=$("#id_email").val();
+        var nickname=$("#id_nickname").val();
+        var verification_code=$("#id_verification_code").val();
+        var csrf=$("[name='csrfmiddlewaretoken']").val();
+        formData.append('username', username);
+        formData.append('password', password);
+        formData.append('confirm_pwd', confirm_pwd);
+        formData.append('email', email);
+        formData.append('nickname', nickname);
+        formData.append('verification_code', verification_code);
+        formData.append('csrfmiddlewaretoken', csrf);
+        formData.append('img_avatar', $('#id_avatar')[0].files[0]);
+        $.ajax({
+            url:'/reg/',
+            type:'POST',
+            data:formData,
+            processData: false,      // 使用formdata,processData,contentType必须设为false
+            contentType: false,
+            success:function(data){
+                data = JSON.parse(data);
+                if(data['flag']){
+                    location.href = '/login/';
+                } else {
+                    console.log(data);
+                    var errors_dict = data['errors'];
+                    $('.error_confirm_pwd').text(data['errors']['__all__']).css({'color':'red'});
+                    for(var k in errors_dict){
+                        $('#id_'+k).next().text(errors_dict[k]).css({'color':'red'});
+                    }
+                }
+            }
+        })
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,389 @@
+{% extends 'homesite_base.html' %}
+{% block link_script %}
+    {% load staticfiles %}
+    <link rel="stylesheet" href="{% static 'css/article_detail.css' %}">
+{% endblock %}
+{% block header %}
+    {{ block.super }}
+{% endblock %}
+{% block cont_right %}
+    <div class="article">
+        <h5><a class="article_title" href="">{{ article.title }}</a></h5>
+        <hr>
+        {% autoescape off %}
+            <div class="article_cont">{{ article.articledetail.content }}</div>
+        {% endautoescape %}
+        <div class="info">
+            <a class="username"
+               href="/blog/{{ article.user.blog.site }}">{{ article.user.nickname }}</a>
+            <span class="timer">发布于{{ article.create_time|date:"Y-m-d H:i" }}</span>
+            <span class="glyphicon glyphicon-comment"></span><span>评论(<span
+                class="comment_count_num">{{ article.comment_count }}</span>)</span>
+            <span class="glyphicon glyphicon-eye-open"></span><span>阅读({{ article.read_count }})</span>
+            <a class="poll" href="###"><span class="glyphicon glyphicon-thumbs-up"></span><span>赞(<span
+                    class="poll_num">{{ article.up_count }}</span>)</span></a>
+            <a href="###"><span class="glyphicon glyphicon-thumbs-down"></span><span>踩({{ article.down_count }})</span></a>
+            <a href=""><span class="glyphicon glyphicon-edit"></span><span>编辑</span></a>
+
+            <div class="up_errors"></div>
+            {% csrf_token %}
+        </div>
+    </div>
+    <div class="comment_list" id="comment_get">
+        <div class="div" id="comment_list">评论列表</div>
+        <hr>
+        <div class='comment_bar'></div>
+        <ul class="pagination">
+            {% if comment_list_cur.has_previous %}
+                <li class="comment_has_previous">
+                    <a href="###" article_id="{{ article.nid }}"
+                       page="{{ comment_list_cur.previous_page_number }}">上一页</a>
+                </li>
+            {% else %}
+                <li class="disabled comment_has_previous"><a href="###">上一页</a></li>
+            {% endif %}
+
+            {% for num in p.page_range %}
+                {% if forloop.counter == cur_page %}
+                    <li><a id="cur_page_a_tag" style="color: red" article_id="{{ article.nid }}" page="{{ num }}"
+                           href="###">{{ num }}</a></li>
+                {% elif forloop.counter < 3 %}
+                    <li><a article_id="{{ article.nid }}" page="{{ num }}" href="###">{{ num }}</a></li>
+                {% elif forloop.counter|add:2 > p.num_pages %}
+                    <li><a article_id="{{ article.nid }}" page="{{ num }}" href="###">{{ num }}</a></li>
+                    {% load my_tags %}
+                {% elif forloop.counter <= cur_page|parseInt|add:1 and forloop.counter >= cur_page|parseInt|minus:1 %}
+                    <li><a article_id="{{ article.nid }}" page="{{ num }}" href="###">{{ num }}</a></li>
+                {% elif forloop.counter == cur_page|parseInt|add:2 or forloop.counter == cur_page|parseInt|minus:2 %}
+                    <li><span>. . .</span></li>
+                {% endif %}
+            {% endfor %}
+
+            {% if comment_list_cur.has_next %}
+                <li class="comment_has_next">
+                    <a article_id="{{ article.nid }}" page="{{ comment_list_cur.next_page_number }}" href="###">下一页</a>
+                </li>
+            {% else %}
+                <li class="disabled comment_has_next"><a href="###">下一页</a></li>
+            {% endif %}
+            <li><span>第 {{ cur_page }} 页</span></li>
+        </ul>
+    </div>
+    <div class="comment_list" id="create_comment">
+        {% if request.user.is_authenticated %}
+            <p><span class="glyphicon glyphicon-comment"></span>&nbsp;&nbsp;&nbsp;<span class="div">发表评论</span></p>
+            <p>昵称：
+                <input type="text" class="author" disabled="disabled" size="50" value="{{ request.user.nickname }}">
+            </p>
+            <div class="div">评论内容：<span class="comment_errors"></span></div>
+            <form action="">
+                <textarea id="comment_cont" cols="80" rows="15"></textarea>
+
+                <p><input class="btn btn-primary submit_comment" id="submit_comment" type="button" value="提交评论"></p>
+            </form>
+            <script>
+                var editor;
+                KindEditor.ready(function (K) {
+                    editor = K.create('#comment_cont', {
+                        urlType: 'domain'
+                    });
+                });
+            </script>
+        {% else %}
+            <div>注册用户登录后才能发表评论，请&nbsp;<a href="/login/?next_path={{ request.path }}">登录</a></div>
+        {% endif %}
+    </div>
+
+    <script>
+        String.prototype.format = function () {
+            var args = arguments;
+            return this.replace(/\{(\d+)\}/g, function (s, i) {
+                return args[i];
+            })
+        };
+        function CommentTree(comment_list) {
+            var html = "";
+            $.each(comment_list, function (k, v) {
+                var comment_item = "<div class='comment_item'>";
+                var ul_tag = '<ul class="list-group">';
+                var li_tag = '<li class="list-group-item comment_info">';
+                var floor_num = parseInt(v["floor_num"]);
+                var current_user_id = '{{ request.user.nid }}';
+                var floor_a_tag = "";
+                if (!v['parent_comment_id']) {
+                    floor_a_tag = "<a href=''>#<span class='floor_num'>{0}</span>楼&nbsp;</a>".format(floor_num);
+                }
+                var time_span_tag = "<span class='time'>{0}&nbsp;</span>".format(v["create_time"]);
+                var nickname_a_tag = "<a id='nickname' href='/blog/{0}'>{1}</a>".format(v['user__blog__site'], v['user__nickname']);
+                var reply_comment_a_tag = "<a class='pull-right reply_comment' href='#comment_cont' comment_id='{0}'>回复</a>".format(v['nid']);
+                var up_comment_a_tag = "<a class='pull-right up_comment' href='###' comment_id='{0}'>点赞(<span id='up_comment_num_{1}'>{2}</span>)</a>".format(v['nid'], v['nid'], v['up_count']);
+                var del_comment_a_tag = "<a></a>";
+                var edit_comment_a_tag = "<a></a>";
+                if (v['user_id'] == parseInt(current_user_id)) {
+                    del_comment_a_tag = "<a class='pull-right del_comment' href='###' comment_id='{0}'>删除</a>".format(v['nid']);
+                    edit_comment_a_tag = "<a class='pull-right edit_comment' href='###' comment_id='{0}'>编辑</a>".format(v['nid']);
+                }
+                li_tag += floor_a_tag;
+                li_tag += time_span_tag;
+                li_tag += nickname_a_tag;
+                li_tag += reply_comment_a_tag;
+                li_tag += up_comment_a_tag;
+                li_tag += del_comment_a_tag;
+                li_tag += edit_comment_a_tag;
+                li_tag += "</li>";
+                var li_tag2 = "<li class='list-group-item comment_content'>";
+                var comment_content_div = "<div class='content'>{0}&nbsp;</div>".format(v['content']);
+                li_tag2 += comment_content_div;
+                li_tag2 += "</li>";
+                ul_tag += li_tag;
+                ul_tag += li_tag2;
+                ul_tag += "</ul>";
+                comment_item += ul_tag;
+                if (v['children_comment'].length > 0) {
+                    comment_item += CommentTree(v['children_comment']);
+                }
+                comment_item += "</div>";
+                html += comment_item;
+            });
+            return html;
+        }
+        /*页面加载完后 加载已有评论数据*/
+        $(function () {
+            $.ajax({
+                url: '',
+                type: 'GET',
+                success: function (data) {
+                    data = JSON.parse(data);
+                    var comment_list = data['comment_list'];
+                    r = CommentTree(comment_list);
+                    $('.comment_bar').append(r);
+                }
+            });
+        });
+        /*更新评论分页条*/
+        function Update_pagination(page, comment_num_pages, article_id) {
+            page = parseInt(page);
+            comment_num_pages = parseInt(comment_num_pages);
+            var pagination_str = "";
+            var comment_has_previous_li = "<li class='disabled comment_has_previous'><a href='###'>上一页</a></li>";
+            if ((page - 1) > 0) {
+                comment_has_previous_li = "<li class='comment_has_previous'><a href='###' article_id='{0}' page='{1}'>上一页</a></li>".format(article_id, page - 1);
+            }
+            var comment_has_next_li = "<li class='disabled comment_has_next'><a href='###'>下一页</a></li>";
+            if (page < comment_num_pages) {
+                comment_has_next_li = "<li class='comment_has_next'><a href='###' article_id='{0}' page='{1}'>下一页</a></li>".format(article_id, page + 1);
+            }
+            var comment_page_range_li = "";
+            for (var i = 1; i <= comment_num_pages; i++) {
+                if (i == page) {
+                    comment_page_range_li += "<li><a a_type='1' id='cur_page_a_tag' style='color: red' article_id='{0}' page='{1}' href='###'>{2}</a></li>".format(article_id, i, i);
+                } else if (i < 3 || i > comment_num_pages - 2) {
+                    comment_page_range_li += "<li><a a_type='1' article_id='{0}' page='{1}' href='###'>{2}</a></li>".format(article_id, i, i);
+                } else if (i <= (page + 1) && i >= (page - 1)) {
+                    comment_page_range_li += "<li><a a_type='1' article_id='{0}' page='{1}' href='###'>{2}</a></li>".format(article_id, i, i);
+                } else if (i == page + 2 || i == page - 2) {
+                    comment_page_range_li += "<li><span>. . .</span></li>";
+                }
+            }
+            pagination_str = comment_has_previous_li + comment_page_range_li + comment_has_next_li;
+            $('.pagination').html('');
+            $('.pagination').append(pagination_str);
+        }
+        /*更新评论内容*/
+        $('#comment_get').delegate('a', 'click', function () {
+            var article_id = $(this).attr('article_id');
+            var page = $(this).attr('page');
+            if (page && article_id) {
+                $.ajax({
+                    url: '',
+                    type: 'GET',
+                    data: {
+                        'page': page,
+                        'article_id': article_id
+                    },
+                    success: function (data) {
+                        data = JSON.parse(data);
+                        var comment_list = data['comment_list'];
+                        var page = data['page'];
+                        $('#comment_get a[id="cur_page_a_tag"]').attr('id', '').css('color', '');
+                        $('#comment_get a[page="' + page + '"]').attr({'id': "cur_page_a_tag"}).css('color', 'red');
+                        r = CommentTree(comment_list);
+                        $('.comment_bar').html('');
+                        $('.comment_bar').append(r);
+                        Update_pagination(page, data['comment_num_pages'], article_id);
+                    }
+                });
+            }
+        });
+        /*全局变量 文章ID*/
+        var article_id = '{{ article.nid }}';
+        /*全局变量 父评论ID*/
+        var parent_comment_id = '';
+        /*全局变量 编辑评论ID*/
+        var edit_comment_id = '';
+        var old_submit_comment_btn_val = null;
+        /*全局变量 csrf_token*/
+        var csrf = $("[name='csrfmiddlewaretoken']").val();
+        /*回复评论*/
+        $('.comment_list').delegate('.reply_comment', 'click', function () {
+            {% if request.user.is_authenticated %}
+                if (old_submit_comment_btn_val != null) {
+                    $('#cancel_edit_comment').remove();
+                    $('.ke-edit-iframe').contents().find('.ke-content').text('');
+                    $('#submit_comment').val(old_submit_comment_btn_val);
+                    old_submit_comment_btn_val = null;
+                }
+                parent_comment_id = $(this).attr('comment_id');
+                var comment_user_nickname = $(this).prev().text();
+                $('.ke-edit-iframe').contents().find('.ke-content').text('@ ' + comment_user_nickname + '\n');
+            {% else %}
+                var next_path = '{{ request.path }}';
+                var a_tag = $('<span class="pull-right">请先<a href="/login/?next_path=' + next_path + '">登录</a></span>');
+                $(this).after(a_tag);
+                $(this).remove();
+            {% endif %}
+        });
+        /*提交评论*/
+        $('.submit_comment').click(function () {
+            {% if request.user.is_authenticated %}
+                var commentContent = $('.ke-edit-iframe').contents().find('.ke-content').html();
+                var index = commentContent.indexOf('\n');
+                var comment_cont = commentContent.substr(index + 1).replace(/\n(\n)*( )*(\n)*\n/g, "\n");
+                console.log(comment_cont);
+                $.ajax({
+                    url: "/comment/",
+                    type: "POST",
+                    data: {
+                        'csrfmiddlewaretoken': csrf,
+                        'article_id': article_id,
+                        'comment_cont': comment_cont,
+                        'parent_comment_id': parent_comment_id,
+                        'edit_comment_id': edit_comment_id
+                    },
+                    success: function (data) {
+                        data = JSON.parse(data);
+                        if (data['result'] == 'success') {
+                            $('.comment_count_num').text(data['comment_count']);
+                            $('.comment_errors').text('感谢您的回复:) ').css({'color': 'red'});
+                            $('.ke-edit-iframe').contents().find('.ke-content').text('');
+                            $('#cur_page_a_tag').trigger('click');
+                        } else if (data['result'] == 'fail') {
+                            $('.comment_errors').text('程序错误，请联系管理员').css({'color': 'red'});
+                        }
+                    }
+                });
+            {% else %}
+                var next_path = "{{ request.path }}";
+                $('.comment_errors').html("请先<a href='/login/?next_path=" + next_path + "'>登录</a>").css({'color': 'red'});
+            {% endif %}
+            parent_comment_id = '';
+            edit_comment_id = '';
+            $('#cancel_edit_comment').remove();
+            if (old_submit_comment_btn_val != null) {
+                $('#submit_comment').val(old_submit_comment_btn_val);
+                old_submit_comment_btn_val = null;
+            }
+        });
+        /*删除评论*/
+        $('.comment_list').delegate('.del_comment', 'click', function () {
+            var comment_id = $(this).attr('comment_id');
+            var $del_tag = $(this).parent().parent();
+            $.ajax({
+                url: "/del_comment/",
+                type: "POST",
+                data: {
+                    'csrfmiddlewaretoken': csrf,
+                    'comment_id': comment_id,
+                    'article_id':{{ article_id }}
+                },
+                success: function (data) {
+                    data = JSON.parse(data);
+                    if (data['result'] == 'success') {
+                        $del_tag.remove();
+                        $('.comment_count_num').text(data['comment_count']);
+                        $('#cur_page_a_tag').trigger('click');
+                    } else if (data['result'] == 'fail') {
+                        $del_tag.append('<span>该评论已删除</span>');
+                    }
+                }
+            });
+        });
+        /*编辑评论*/
+        $('.comment_list').delegate('.edit_comment', 'click', function () {
+            edit_comment_id = $(this).attr('comment_id');
+            var old_comment_content = $(this).parent().parent().find('.content').html().replace(/<br>/g, '\n').replace(/&nbsp;/g, '');
+            old_submit_comment_btn_val = $('#submit_comment').val();
+            $('#submit_comment').val('修改');
+            $('.ke-edit-iframe').contents().find('.ke-content').html(old_comment_content);
+            $('#submit_comment').siblings('a').remove();
+            $('#submit_comment').after('<a id="cancel_edit_comment">不改了</a>');
+
+        });
+        /*取消编辑评论*/
+        $('.comment_list').delegate('#cancel_edit_comment', 'click', function () {
+            var r = confirm("确认取消修改吗?");
+            if (r == true) {
+                $('#cancel_edit_comment').remove();
+                $('.ke-edit-iframe').contents().find('.ke-content').text('');
+                $('#submit_comment').val(old_submit_comment_btn_val);
+                old_submit_comment_btn_val = null;
+            }
+        });
+        /*点赞评论*/
+        $('.comment_list').delegate('.up_comment', 'click', function () {
+            {% if request.user.is_authenticated %}
+                var comment_id = $(this).attr('comment_id');
+                $.ajax({
+                    url: '/comment_up/',
+                    type: 'POST',
+                    data: {
+                        'csrfmiddlewaretoken': csrf,
+                        'comment_id': comment_id
+                    },
+                    success: function (data) {
+                        data = JSON.parse(data);
+                        if (data['result'] == 'success') {
+                            $('#up_comment_num_' + comment_id).text(data['up_count']);
+                        } else if (data['result'] == 'is_exist') {
+                            $('.up_comment[comment_id=' + comment_id + ']').text('您已经推荐过').css({'color': 'red'});
+                        } else if (data['result'] == 'fail') {
+                            alert('程序错误，请联系管理员');
+                        }
+                    }
+                });
+            {% else %}
+                var next_path = '{{ request.path }}';
+                var a_tag = $('<span class="pull-right">请先<a href="/login/?next_path=' + next_path + '">登录</a></span>');
+                $(this).after(a_tag);
+                $(this).remove();
+            {% endif %}
+        });
+        /*点赞*/
+        $('.poll').click(function () {
+            {% if request.user.is_authenticated %}
+                $.ajax({
+                    url: "/article_up_down/",
+                    type: "POST",
+                    data: {
+                        'csrfmiddlewaretoken': csrf,
+                        'article_id': article_id,
+                        'is_up': true
+                    },
+                    success: function (data) {
+                        data = JSON.parse(data);
+                        if (data['result'] == 'success') {
+                            $('.poll_num').text(data['up_count']);
+                        } else if (data['result'] == 'is_exist') {
+                            $('.up_errors').text('您已经推荐过').css({'color': 'red'});
+                        } else if (data['result'] == 'fail') {
+                            $('.up_errors').text('程序错误，请联系管理员').css({'color': 'red'});
+                        }
+                    }
+                });
+            {% else %}
+                var next_path = '{{ request.path }}';
+                $('.up_errors').html('请先<a href="/login/?next_path=' + next_path + '">登录</a>').css({'color': 'red'});
+            {% endif %}
+        });
+    </script>
+{% endblock %}

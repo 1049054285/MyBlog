@@ -1,0 +1,360 @@
+<style>
+    .lf-item {
+        width: 100%;
+        margin-top: 25px;
+        height: 40px;
+        line-height: 40px;
+        text-align: center;
+    }
+
+    .lf-item-title {
+        background-color: #245580;
+        color: white;
+    }
+
+    .hide {
+        display: none;
+    }
+
+    .cover {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        opacity: 0.5;
+        background-color: #555555;
+        z-index: 100;
+    }
+
+    .model_edit {
+        overflow: auto;
+        position: absolute;
+        width: 90%;
+        top: 5px;
+        left: 100px;
+        z-index: 101;
+        background-color: #fff;
+        border: 1px solid rgba(0, 0, 0, .2);
+        border-radius: 6px;
+        padding: 50px 22px;
+    }
+
+    .close {
+        margin-right: 30px;
+        margin-top: -26px;
+        font-size: 33px !important;
+    }
+
+    .btn {
+        margin: 0 4px;
+    }
+</style>
+{% extends 'backstage_base.html' %}
+{% block title %}
+    <title>后台管理</title>
+{% endblock %}
+{% block cont_lt %}
+    <div class="lf-item lf-item-title">操作</div>
+    <div class="lf-item"><a class="lf-item" href="/add_article/">&gt;&gt;&gt;添加文章</a></div>
+{% endblock %}
+{% block cont_rt %}
+    <div class="container-fluid">
+        <div class="row search_bar" style="margin-top: 15px;">
+            <div class="col-md-5 col-md-offset-7">
+                <form class="form-inline" action="/backstage/" method="post">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <input type="text" class="form-control" id="search_title" placeholder="Title" name="title">
+                    </div>
+                    <button type="submit" class="btn btn-primary">查找</button>
+                </form>
+            </div>
+        </div>
+        <div class="row article_bar"></div>
+        <div class="row hide model_edit"></div>
+        <div class="cover hide"></div>
+    </div>
+    <script>
+        Array.prototype.contains = function ( needle ) {
+          for (var i in this) {
+            if (this[i] == needle) return true;
+          }
+          return false;
+        };
+
+        /*更新文章内容*/
+        $('.article_bar').delegate('a', 'click', function () {
+            var page = $(this).attr('page');
+            if (page) {
+                $.ajax({
+                    url: '',
+                    type: 'GET',
+                    data: {
+                        'page': page
+                    },
+                    success: function (data) {
+                        data = JSON.parse(data);
+                        var article_table_str = load_article(data['article_list']);
+                        var pagination_str = load_pagination(data['page'], data['article_num_pages']);
+                        var article_bar_html = "<div class='col-md-12 col-md-offset-0'>";
+                        article_bar_html += article_table_str;
+                        article_bar_html += pagination_str;
+                        article_bar_html += "</div>";
+                        $('.article_bar').html('');
+                        $('.article_bar').append(article_bar_html);
+                    }
+                });
+            }
+        });
+        $('.model_edit').delegate('.close', 'click', function () {
+            $('.model_edit').addClass('hide');
+            $('.cover').addClass('hide');
+            $('.model_edit').html('');
+        });
+        var $edit_tr_tag = '';
+        var edit_article_id = '';
+        $('.model_edit').delegate('.submit', 'click', function(){
+            var formData = new FormData();
+            $('.model_edit input[type="text"],.model_edit input[name="csrfmiddlewaretoken"]').each(function(){
+                var col_name = $(this).attr('name');
+                var col_value = $(this).val();
+                formData.append(col_name, col_value);
+            });
+            $('.model_edit input:checked').each(function(){
+                var col_name = $(this).attr('name');
+                var col_value = $(this).val();
+                formData.append(col_name, col_value);
+            });
+            $('.model_edit select option:selected').each(function(){
+                var col_name = $(this).parent().attr('name');
+                var col_value = $(this).val();
+                formData.append(col_name, col_value);
+            });
+            formData.append('id', edit_article_id);
+{#            var content = $('#article_content').val();#}
+            var content = $('#article_content').html();
+            formData.append('content', content);
+            $.ajax({
+                url: "/edit_article/",
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (formData) {
+                    $('#cur_page_a_tag').trigger('click');
+                }
+            });
+            $('.model_edit').addClass('hide');
+            $('.cover').addClass('hide');
+            $('.model_edit').html('');
+        });
+        $('.article_bar').delegate('.edit_btn', 'click', function () {
+            var article_id = $(this).attr('article_id');
+            edit_article_id = article_id;
+            $.ajax({
+                url: '/edit_article/',
+                type: 'GET',
+                data: {
+                    'article_id': article_id
+                },
+                success: function (data) {
+                    data = JSON.parse(data);
+                    var article = data['article_values'];
+                    var homeCategory_list = data['homeCategory_list'];
+                    var siteSubCategory_list = data['siteSubCategory_list'];
+                    var tag_list = data['tag_list'];
+                    var form_str = "<button class='close'>×</button><form method='post'><input type='hidden' name='csrfmiddlewaretoken' value='{{ csrf_token }}'>";
+                    var title_str = "<div class='form-group'><label for='title'>文章标题</label><input type='text' class='form-control' id='title' placeholder='title' name='title' value='{0}'></div>".format(article['title']);
+                    var desc_str = "<div class='form-group'><label for='desc'>文章描述</label><input type='text' class='form-control' id='desc' placeholder='desc' name='desc' value='{0}'></div>".format(article['desc']);
+                    var homeCategory_str = "<div class='form-group'><label class='required' for='id_homeCategory'>博主个人文章类型:</label><select class='form-control' name='homeCategory' id='id_homeCategory' required=''>";
+                    var homeCategory_opt = "";
+                    $.each(homeCategory_list, function (k, v) {
+                        if (parseInt(article['homeCategory_id']) == parseInt(v['nid'])) {
+                            homeCategory_opt += "<option value='{0}' selected='selected'>{1}</option>".format(v['nid'], v['title']);
+                        } else {
+                            homeCategory_opt += "<option value='{0}'>{1}</option>".format(v['nid'], v['title']);
+                        }
+                    });
+                    homeCategory_str = homeCategory_str + homeCategory_opt + "</select></div>";
+                    var siteSubCategory_str = "<div class='form-group'><label class='required' for='id_siteSubCategory'>网站子类型:</label><select class='form-control' name='siteSubCategory' id='id_siteSubCategory' required=''>";
+                    var siteSubCategory_opt = "";
+                    $.each(siteSubCategory_list, function (k, v) {
+                        if (parseInt(article['siteSubCategory_id']) == parseInt(v['nid'])) {
+                            siteSubCategory_opt += "<option value='{0}' selected='selected'>{1}</option>".format(v['nid'], v['name']);
+                        } else {
+                            siteSubCategory_opt += "<option value='{0}'>{1}</option>".format(v['nid'], v['name']);
+                        }
+                    });
+                    siteSubCategory_str = siteSubCategory_str + siteSubCategory_opt + "</select></div>";
+                    var tag_str = "<label class='required' for='id_tag'>标签:</label>";
+                    $.each(tag_list, function (k, v) {
+                        if (article['tags_id'].contains(parseInt(v['nid']))) {
+                            tag_str += "<div class='checkbox'><label><input type='checkbox' id='id_tag' name='tag' value='{0}' checked='checked'>{1}</label></div>".format(v['nid'], v['title']);
+                        } else {
+                            tag_str += "<div class='checkbox'><label><input type='checkbox' id='id_tag' name='tag' value='{0}'>{1}</label></div>".format(v['nid'], v['title']);
+                        }
+                    });
+{#                    var article_content = "<label class='required' for='article_content'>文章内容:</label><textarea class='form-control' id='article_content' name='article_content' cols='80' rows='15'></textarea>";#}
+                    var article_content = "<label class='required' for='article_content'>文章内容:</label><div id='article_content' name='article_content' contentEditable='true'></div>";
+                    var btn_str = "<input type='button' class='btn btn-default submit' value='Submit'></input>";
+                    form_str = form_str + title_str + desc_str + homeCategory_str + siteSubCategory_str + tag_str + article_content + btn_str + "</form>";
+                    $('.model_edit').append(form_str);
+                    if (article['articledetail__content'])
+                        $('.model_edit #article_content').append(article['articledetail__content']);
+{#                        $('.model_edit #article_content')[0].innerText = article['articledetail__content'];#}
+                    $('.model_edit').removeClass('hide');
+                    $('.cover').removeClass('hide');
+                }
+            });
+        });
+        $('.article_bar').delegate('.del_btn', 'click', function () {
+            var article_id = $(this).attr('article_id');
+            $.ajax({
+                url: '/del_article/',
+                type: 'GET',
+                data: {
+                    'article_id': article_id
+                },
+                success: function (data) {
+                    if (data == 'ok') {
+                        $('#cur_page_a_tag').trigger('click');
+                        alert('删除文章成功!');
+                    }
+                }
+            });
+        });
+        String.prototype.format = function () {
+            var args = arguments;
+            return this.replace(/\{(\d+)\}/g, function (s, i) {
+                return args[i];
+            })
+        };
+        function load_article(article_list) {
+            /*加载文章表格*/
+            var article_table_str = "<table class='table table-striped'><thead><tr><th>标题</th><th>评论数</th><th>阅读数</th><th>操作</th></tr></thead><tbody id='tb'>";
+            $.each(article_list, function (k, v) {
+                var tr = "<tr>";
+                var title_time_td = "<td name='title'><a href='/blog/{0}/article/{1}'>{2}({3})</a></td>".format(v['user__blog__site'], v['nid'], v['title'], v['create_time']);
+                var comment_count_td = "<td name='comment_count'>{0}</td>".format(v['comment_count']);
+                var read_count_td = "<td name='read_count'>{0}</td>".format(v['read_count']);
+                var del_edit_td = "<td><button class='btn btn-danger del_btn' article_id='{0}'>删除</button><button class='btn btn-info edit_btn' article_id='{1}'>编辑</button></td>".format(v['nid'], v['nid']);
+                tr += title_time_td;
+                tr += comment_count_td;
+                tr += read_count_td;
+                tr += del_edit_td;
+                tr += "</tr>";
+                article_table_str += tr;
+            });
+            article_table_str += "</tbody></table>";
+            return article_table_str;
+        }
+        function load_pagination(page, article_num_pages) {
+            page = parseInt(page);
+            article_num_pages = parseInt(article_num_pages);
+            var pagination_str = "<ul class='pagination'>";
+            var article_has_previous_li = "<li class='disabled'><a href='###'>上一页</a></li>";
+            if ((page - 1) > 0) {
+                article_has_previous_li = "<li class=''><a href='###' page='{0}'>上一页</a></li>".format(page - 1);
+            }
+            var article_has_next_li = "<li class='disabled'><a href='###'>下一页</a></li>";
+            if (page < article_num_pages) {
+                article_has_next_li = "<li class=''><a href='###' page='{0}'>下一页</a></li>".format(page + 1);
+            }
+            var article_page_range_li = "";
+            for (var i = 1; i <= article_num_pages; i++) {
+                if (i == page) {
+                    article_page_range_li += "<li><a id='cur_page_a_tag' style='color: red' page='{0}' href='###'>{1}</a></li>".format(i, i);
+                } else if (i < 3 || i > article_num_pages - 2) {
+                    article_page_range_li += "<li><a page='{0}' href='###'>{1}</a></li>".format(i, i);
+                } else if (i <= (page + 1) && i >= (page - 1)) {
+                    article_page_range_li += "<li><a page='{0}' href='###'>{1}</a></li>".format(i, i);
+                } else if (i == page + 2 || i == page - 2) {
+                    article_page_range_li += "<li><span>. . .</span></li>";
+                }
+            }
+            pagination_str = pagination_str + article_has_previous_li + article_page_range_li + article_has_next_li + "</ul>";
+            return pagination_str;
+        }
+        $(function () {
+            $.ajax({
+                url: '',
+                type: 'GET',
+                success: function (data) {
+                    data = JSON.parse(data);
+                    var article_table_str = load_article(data['article_list']);
+                    var pagination_str = load_pagination(data['page'], data['article_num_pages']);
+                    var article_bar_html = "<div class='col-md-12 col-md-offset-0'>";
+                    article_bar_html += article_table_str;
+                    article_bar_html += pagination_str;
+                    article_bar_html += "</div>";
+                    $('.article_bar').html('');
+                    $('.article_bar').append(article_bar_html);
+                }
+            });
+        });
+    </script>
+    {#    <script>#}
+    {#        var $edit_tr_tag = '';#}
+    {#        var edit_book_id = '';#}
+    {#        $('.edit_btn').click(function () {#}
+    {#            var book_id = $(this).attr('book_id');#}
+    {#            $.ajax({#}
+    {#                url: "/book/edit_book/",#}
+    {#                type: 'GET',#}
+    {#                data: {'id': book_id},#}
+    {#                success: function (data) {#}
+    {#                    $('.model_edit').html(data);#}
+    {#                }#}
+    {#            });#}
+    {#            $('.model_edit').removeClass('hide');#}
+    {#            $('.cover').removeClass('hide');#}
+    {#            edit_book_id = book_id;#}
+    {#            $edit_tr_tag = $(this).parent().parent();#}
+    {#            console.log('set $edit_tr_tag:',$edit_tr_tag[0]);#}
+    {#        });#}
+    {#        $('.model_edit').delegate('button', 'click', function(){#}
+    {#            var formData = new FormData();#}
+    {#            $('.model_edit input').each(function(){#}
+    {#                var col_name = $(this).attr('name');#}
+    {#                var col_value = $(this).val();#}
+    {#                formData.append(col_name, col_value);#}
+    {#            });#}
+    {#            formData.append('id', edit_book_id);#}
+    {#            $.ajax({#}
+    {#                url: "/book/edit_book/",#}
+    {#                type: 'POST',#}
+    {#                data: formData,#}
+    {#                processData: false,#}
+    {#                contentType: false,#}
+    {#                success: function (formData) {#}
+    {#                    var formData = JSON.parse(formData);#}
+    {#                    for(var key in formData){#}
+    {#                        $($edit_tr_tag.find('td[name="' + key + '"]')).text(formData[key]);#}
+    {#                    }#}
+    {#                     edit_book_id = '';#}
+    {#                    $edit_tr_tag = '';#}
+    {#                }#}
+    {#            });#}
+    {#            $('.model_edit').addClass('hide');#}
+    {#            $('.cover').addClass('hide');#}
+    {#            $('.model_edit').html('');#}
+    {#        });#}
+    {#        $('.del_btn').click(function () {#}
+    {#            var book_id = $(this).attr('book_id');#}
+    {#            $.ajax({#}
+    {#                url: "/book/del_book/",#}
+    {#                type: 'GET',#}
+    {#                data: {#}
+    {#                    'page': {{ cur_page }},#}
+    {#                    'title': '{{ title }}',#}
+    {#                    'id': book_id#}
+    {#                },#}
+    {#                success: function (data) {#}
+    {#                    alert('删除书籍成功!');#}
+    {#                    $("body").html(data);#}
+    {#                }#}
+    {#            });#}
+    {#        });#}
+    {#    </script>#}
+{% endblock %}

@@ -1,0 +1,66 @@
+{% extends 'homesite_base.html' %}
+{% block link_script %}
+{% load staticfiles %}
+<link rel="stylesheet" href="{% static 'css/home_site.css' %}">
+{% endblock %}
+{% block header %}
+{{ block.super }}
+{% endblock %}
+{% block cont_right %}
+<div class="article_list">
+    <div class="container">
+        {% for article in article_list %}
+            <div class="article_item">
+                <h5><a class="art_title" href="/blog/{{ article.user.blog.site }}/article/{{ article.nid }}">{{ article.title }}</a></h5>
+                <div class="row">
+                    <div class="desc col-md-10">{{ article.desc }}</div>
+                </div>
+                <div class="info">
+                    <a class="username"
+                       href="/blog/{{ article.user.blog.site }}">{{ article.user.nickname }}</a>
+                    <span class="timer">发布于{{ article.create_time|date:"Y-m-d H:i" }}</span>&nbsp;&nbsp;
+                    <span class="glyphicon glyphicon-comment"></span>&nbsp;<span>评论({{ article.comment_count }})</span>
+                    <span class="glyphicon glyphicon-eye-open"></span>&nbsp;<span>阅读({{ article.read_count }})</span>
+                    <a class="poll" article_id="{{ article.nid }}" href="###"><span class="glyphicon glyphicon-thumbs-up"></span>&nbsp;<span>赞(<span class="poll_num_{{ article.nid }}">{{ article.up_count }}</span>)</span></a>
+                    <span class="glyphicon glyphicon-thumbs-down"></span>&nbsp;<span>踩({{ article.down_count }})</span>
+                    <a href="">编辑</a>
+                    <div class="errors_{{ article.nid }}"></div>
+                    <div class="errors"></div>
+                </div>
+            </div>
+            <hr>
+        {% endfor %}
+    {% csrf_token %}
+    </div>
+</div>
+    <script>
+    $('.poll').click(function () {
+        var csrf=$("[name='csrfmiddlewaretoken']").val();
+        var article_id = $(this).attr('article_id');
+        {% if request.user.is_authenticated %}
+        $.ajax({
+            url:"/article_up_down/",
+            type:"POST",
+            data:{
+                'csrfmiddlewaretoken':csrf,
+                'article_id':article_id,
+                'is_up':true
+            },
+            success:function(data){
+                data = JSON.parse(data);
+                if(data['result']=='success'){
+                    $('.poll_num_'+article_id).text(data['up_count']);
+                }else if(data['result']=='is_exist'){
+                    $('.errors_'+article_id).text('您已经推荐过').css({'color':'red'});
+                }else if(data['result']=='fail'){
+                    $('.errors_'+article_id).text('程序错误，请联系管理员').css({'color':'red'});
+                }
+            }
+        });
+        {% else %}
+        var next_path = '{{ request.path }}';
+        $(this).siblings('.errors').html('请先<a href="/login/?next_path='+next_path+'">登录</a>').css({'color':'red'});
+        {% endif %}
+    });
+</script>
+{% endblock %}

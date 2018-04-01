@@ -1,0 +1,54 @@
+body {
+    color: #333;
+    background: #dee7de;
+    margin: 0;
+    font-size: 12px;
+}
+a {
+    text-decoration: none;
+    cursor: pointer;
+    color: #555;
+}
+ul, li {
+    text-decoration: none;
+    list-style: none;
+}
+.header {
+    height: 76px;
+    background: url("../images/header.gif") left top repeat-x;
+    margin-bottom: 8px;
+    line-height: 76px;
+}
+.header .logo {
+    font-size: 30px;
+    color: white;
+    font-weight: bold;
+}
+.header .nav {
+    position: absolute;
+    top: 0;
+    right: 20px;
+    font-size: 16px;
+}
+.header .nav a {
+    background: #5ab2ce;
+    display: inline-block;
+    line-height: 22px;
+    height: 42px;
+    text-align: center;
+    margin: 0 5px;
+    color: #fff;
+}
+.header .nav a:hover {
+    background: #7bc3d6;
+}
+.panel .panel-heading {
+    font-size: 18px;
+    font-weight: bold;
+}
+.panel .panel-body {
+    font-size: 16px;
+}
+.panel .panel-body > *{
+    margin: 3px 0;
+}

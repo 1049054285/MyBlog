@@ -1,0 +1,248 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{% static 'bs/css/bootstrap.css' %}">
+    <link rel="stylesheet" href="{% static 'css/index.css' %}">
+    <script src="{% static 'bs/js/jquery-1.12.4.js' %}"></script>
+    <script src="{% static 'bs/js/bootstrap.js' %}"></script>
+    <title></title>
+</head>
+<body>
+<!-- 导航条开始 -->
+<nav class="navbar navbar-inverse">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                    data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">博客园</a>
+        </div>
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav">
+                {% for type_choice in func %}
+                    <li><a href="#">{{ type_choice.1 }}</a></li>
+                {% endfor %}
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                {% if request.user.is_authenticated %}
+                    <li><a href="/backstage/{{ request.user.username }}">{{ request.user }}</a></li>
+                    <li><a href="/logout/">注销</a></li>
+                {% else %}
+                    <li><a href="/login/">登录</a></li>
+                    <li><a href="/reg/">注册</a></li>
+                {% endif %}
+
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
+                       aria-haspopup="true" aria-expanded="false">设置 <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="#">Action</a></li>
+                        <li><a href="#">Another action</a></li>
+                        <li><a href="#">Something else here</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><a href="#">Separated link</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<!-- 导航条结束 -->
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-2">
+            <div class="panel panel-primary">
+                <!-- Default panel contents -->
+                <div class="panel-heading">网站分类</div>
+                <!-- List group -->
+                <ul class="list-group">
+                    {% for siteCategory in siteCategory_list %}
+                        <li class="list-group-item cate">{{ siteCategory.name }}</li>
+                        {% for siteSubCategory in siteCategory.sitesubcategory_set.all %}
+                            <li class="list-group-item siteSubCategory">{{ siteSubCategory.name }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        <div class="col-md-7">
+            {% csrf_token %}
+            <div class="article_list">
+{#                {% for article in article_list %}#}
+{#                    <div class="article_item">#}
+{#                        <h5><a class="art_title"#}
+{#                               href="/blog/{{ article.user.blog.site }}/article/{{ article.nid }}">{{ article.title }}</a>#}
+{#                        </h5>#}
+{##}
+{#                        <div class="row">#}
+{#                            <div class="avatar_img col-md-1"><a href="/blog/{{ article.user.blog.site }}"><img#}
+{#                                    src="/media/{{ article.user.avatar }}" alt=""#}
+{#                                    width="60" height="60"/></a></div>#}
+{#                            <div class="desc col-md-10">{{ article.desc }}</div>#}
+{#                        </div>#}
+{#                        <div class="info">#}
+{#                            <a class="username"#}
+{#                               href="/blog/{{ article.user.blog.site }}">{{ article.user.nickname }}</a>#}
+{#                            <span class="timer">发布于{{ article.create_time|date:"Y-m-d H:i" }}</span>&nbsp;&nbsp;#}
+{#                            <a href=""><span#}
+{#                                    class="glyphicon glyphicon-comment"></span>&nbsp;<span>评论({{ article.comment_count }})</span></a>#}
+{#                            <a href=""><span#}
+{#                                    class="glyphicon glyphicon-eye-open"></span>&nbsp;<span>阅读({{ article.read_count }})</span></a>#}
+{#                            <a class="poll" article_id="{{ article.nid }}" href="###"><span#}
+{#                                    class="glyphicon glyphicon-thumbs-up"></span>&nbsp;<span>赞(<span#}
+{#                                    class="poll_num_{{ article.nid }}">{{ article.up_count }}</span>)</span></a>#}
+{#                            <a href=""><span#}
+{#                                    class="glyphicon glyphicon-thumbs-down"></span>&nbsp;<span>踩({{ article.down_count }})</span></a>#}
+{##}
+{#                            <div class="errors_{{ article.nid }}"></div>#}
+{#                            <div class="errors"></div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                    <hr>#}
+{#                {% endfor %}#}
+
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="panel panel-info">
+                <div class="panel-heading">Panel heading without title</div>
+                <div class="panel-body">
+                    Panel content
+                </div>
+            </div>
+            <div class="panel panel-warning">
+                <div class="panel-heading">Panel heading without title</div>
+                <div class="panel-body">
+                    Panel content
+                </div>
+            </div>
+            <div class="panel panel-danger">
+                <div class="panel-heading">Panel heading without title</div>
+                <div class="panel-body">
+                    Panel content
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+    String.prototype.format = function () {
+        var args = arguments;
+        return this.replace(/\{(\d+)\}/g, function (s, i) {
+            return args[i];
+        })
+    };
+    function Load_article(article_list) {
+        /*加载文章表格*/
+        var html = "";
+        $.each(article_list, function (k, v) {
+            var article_item_str = "<div class='article_item'>";
+            var title_str = "<h5><a class='art_title' href='/blog/{0}/article/{1}'>{2}</a></h5>".format(v['user__blog__site'], v['nid'], v['title']);
+            var avatar_desc_row_str = "<div class='row'><div class='avatar_img col-md-1'><a href='/blog/{0}'><img src='/media/{1}' alt='' width='60' height='60'/></a></div><div class='desc col-md-10'>{2}</div></div>".format(v['user__blog__site'], v['user__avatar'], v['desc']);
+            var info_row_str = "<div class='info'><a class='username' href='/blog/{0}'>{1}</a><span class='timer'>发布于{2}</span>&nbsp;&nbsp;<a href=''><span class='glyphicon glyphicon-comment'></span>&nbsp;<span>评论({3})</span></a><a href=''><span class='glyphicon glyphicon-eye-open'></span>&nbsp;<span>阅读({4})</span></a><a class='poll' article_id='{5}' href='###'><span class='glyphicon glyphicon-thumbs-up'></span>&nbsp;<span>赞(<span class='poll_num_{6}'>{7}</span>)</span></a><a href=''><span class='glyphicon glyphicon-thumbs-down'></span>&nbsp;<span>踩({8})</span></a><div class='errors_{9}'></div><div class='errors'></div></div>".format(v['user__blog__site'], v['user__nickname'], v['create_time'], v['comment_count'], v['read_count'], v['nid'], v['nid'], v['up_count'], v['down_count'], v['nid']);
+            article_item_str = article_item_str + article_item_str + title_str + avatar_desc_row_str + info_row_str + "</div><hr>";
+            html += article_item_str;
+        });
+        return html;
+    }
+    function Load_pagination(page, article_num_pages) {
+        page = parseInt(page);
+        article_num_pages = parseInt(article_num_pages);
+        var pagination_str = "<ul class='pagination'>";
+        var article_has_previous_li = "<li class='disabled'><a href='###'>上一页</a></li>";
+        if ((page - 1) > 0) {
+            article_has_previous_li = "<li class=''><a href='###' page='{0}'>上一页</a></li>".format(page - 1);
+        }
+        var article_has_next_li = "<li class='disabled'><a href='###'>下一页</a></li>";
+        if (page < article_num_pages) {
+            article_has_next_li = "<li class=''><a href='###' page='{0}'>下一页</a></li>".format(page + 1);
+        }
+        var article_page_range_li = "";
+        for (var i = 1; i <= article_num_pages; i++) {
+            if (i == page) {
+                article_page_range_li += "<li><a id='cur_page_a_tag' style='color: red' page='{0}' href='###'>{1}</a></li>".format(i, i);
+            } else if (i < 3 || i > article_num_pages - 2) {
+                article_page_range_li += "<li><a page='{0}' href='###'>{1}</a></li>".format(i, i);
+            } else if (i <= (page + 1) && i >= (page - 1)) {
+                article_page_range_li += "<li><a page='{0}' href='###'>{1}</a></li>".format(i, i);
+            } else if (i == page + 2 || i == page - 2) {
+                article_page_range_li += "<li><span>. . .</span></li>";
+            }
+        }
+        pagination_str = pagination_str + article_has_previous_li + article_page_range_li + article_has_next_li + "</ul>";
+        return pagination_str;
+    }
+    /*更新文章内容*/
+    $('.article_list').delegate('a', 'click', function () {
+        var page = $(this).attr('page');
+        if (page) {
+            $.ajax({
+                url: '',
+                type: 'GET',
+                data: {
+                    'page': page
+                },
+                success: function (data) {
+                    data = JSON.parse(data);
+                    var article_item_str = Load_article(data['article_list']);
+                    var pagination_str = Load_pagination(data['page'], data['article_num_pages']);
+                    $('.article_list').html('');
+                    $('.article_list').append(article_item_str);
+                    $('.article_list').append(pagination_str);
+                }
+            });
+        }
+    });
+    $(function () {
+        $.ajax({
+            url: '',
+            type: 'GET',
+            success: function (data) {
+                data = JSON.parse(data);
+                var article_item_str = Load_article(data['article_list']);
+                var pagination_str = Load_pagination(data['page'], data['article_num_pages']);
+                $('.article_list').html('');
+                $('.article_list').append(article_item_str);
+                $('.article_list').append(pagination_str);
+            }
+        });
+    });
+    $('.article_list').delegate('.poll', 'click', function () {
+        var csrf = $("[name='csrfmiddlewaretoken']").val();
+        var article_id = $(this).attr('article_id');
+        {% if request.user.is_authenticated %}
+            $.ajax({
+                url: "/article_up_down/",
+                type: "POST",
+                data: {
+                    'csrfmiddlewaretoken': csrf,
+                    'article_id': article_id,
+                    'is_up': true
+                },
+                success: function (data) {
+                    data = JSON.parse(data);
+                    if (data['result'] == 'success') {
+                        console.log($('.poll_num_' + article_id)[0]);
+                        $('.poll_num_' + article_id).text(data['up_count']);
+                    } else if (data['result'] == 'is_exist') {
+                        $('.errors_' + article_id).text('您已经推荐过').css({'color': 'red'});
+                    } else if (data['result'] == 'fail') {
+                        $('.errors_' + article_id).text('程序错误，请联系管理员').css({'color': 'red'});
+                    }
+                }
+            });
+        {% else %}
+            var next_path = '{{ request.path }}';
+            $(this).siblings('.errors').html('请先<a href="/login/?next_path=' + next_path + '">登录</a>').css({'color': 'red'});
+        {% endif %}
+    });
+</script>
+</html>

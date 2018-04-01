@@ -1,0 +1,99 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{% static 'bs/css/bootstrap.css' %}">
+    <script src="{% static 'kindeditor/kindeditor-all.js' %}"></script>
+    <script src="{% static 'bs/js/jquery-1.12.4.js' %}"></script>
+{#    <script src="{% static 'bs/js/jquery-1.12.4.js' %}"></script>#}
+    <style>
+        .container {
+            margin-top: 10px;
+        }
+    </style>
+    <title>添加文章</title>
+</head>
+<body>
+<div class="container">
+    <div class="row">
+        <div class="col-md-5 col-md-offset-3">
+            <form class="" action="/add_article/" method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="title">文章标题</label>
+                    <input type="text" class="form-control" id="title" placeholder="title" name="title">
+                </div>
+
+                <div class="form-group">
+                    <label for="desc">文章描述</label>
+                    <input type="text" class="form-control" id="desc" placeholder="desc" name="desc">
+                </div>
+
+                <div class="form-group">
+                    <label class="required" for="id_homeCategory">博主个人文章类型:</label>
+                    <select class="form-control" name="homeCategory" id="id_homeCategory" required="">
+                        <option value="">---------</option>
+                        {% for homeCategory in homeCategory_list %}
+                            <option value="{{ homeCategory.nid }}">{{ homeCategory.title }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="required" for="id_siteSubCategory">网站子类型:</label>
+                    <select class="form-control" name="siteSubCategory" id="id_siteSubCategory" required="">
+                        <option value="">---------</option>
+                        {% for siteSubCategory in siteSubCategory_list %}
+                            <option value="{{ siteSubCategory.nid }}">{{ siteSubCategory.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <label class="required" for="id_tag">标签:</label>
+                {% for tag in tag_list %}
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox" id="id_tag" name="tag" value="{{ tag.nid }}">
+                            {{ tag.title }}
+                        </label>
+                    </div>
+                {% endfor %}
+
+                <label class="required" for="article_content">文章内容:</label>
+                <textarea class="form-control" id="article_content" name="article_content" cols="80"
+                          rows="15"></textarea>
+
+                <button type="submit" class="btn btn-default">Submit</button>
+
+            </form>
+            <script>
+                $(function () {
+                    initKindEditor();
+                });
+
+                function initKindEditor() {
+                    var kind = KindEditor.create('#article_content', {
+                        width: '100%',       // 文本框宽度(可以百分比或像素)
+                        height: '300px',     // 文本框高度(只能像素)
+                        minWidth: 200,       // 最小宽度（数字）
+                        minHeight: 400,      // 最小高度（数字）
+                        uploadJson: '/kind/upload_img/',
+                        extraFileUploadParams: {
+                            'csrfmiddlewaretoken': '{{ csrf_token }}'
+                        },
+                        fileManagerJson: '/kind/file_manager/',
+                        allowPreviewEmoticons: true,
+                        allowImageUpload: true
+                    });
+                }
+{#                KindEditor.create('#article_content', {#}
+{#                    urlType: 'domain'#}
+{#                });#}
+            </script>
+            {{ error_msg }}
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,83 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{% static 'bs/css/bootstrap.css' %} "/>
+    <script src="{% static 'bs/js/jquery-1.12.4.js' %}"></script>
+    <script src="{% static 'bs/js/bootstrap.js' %}"></script>
+    <script src="{% static 'kindeditor/kindeditor-all-min.js' %}"></script>
+    <style>
+        *{
+            overflow: auto;
+        }
+        .top {
+            background-color: #122b40;
+            position: fixed;
+            top: 0;
+            right: 0;
+            left: 0;
+            height: 70px;
+            line-height: 70px;
+        }
+        .top .logo{
+            color: #eeeeee;
+            font-size: 25px;
+            font-weight: bold;
+            padding-left: 100px;
+        }
+        .top .top-nav a,
+        .top .top-nav span {
+            color: #aaa;
+            margin: 0 15px;
+        }
+        .top .top-nav #user{
+            color: white;
+        }
+        .cont_lt {
+            position: fixed;
+            top: 70px;
+            left: 0;
+            bottom: 0;
+            width: 270px;
+            border-right: 1px solid #122b40;
+        }
+        .cont_rt {
+            position: fixed;
+            top: 70px;
+            right: 0;
+            bottom: 0;
+            left: 270px;
+        }
+
+    </style>
+    {% block title %}
+        <title></title>
+    {% endblock %}
+</head>
+<body>
+<div class="row">
+    <div class="top">
+        <div class="col-md-2">
+            <div class="logo">后台管理</div>
+        </div>
+        <div class="top-nav col-md-6 col-md-offset-1">
+            <a href="/">首页</a>
+        </div>
+        <div class="top-nav col-md-3">
+            <span>欢迎你<span id="user">{{ user }}</span></span>
+            <a href="/logout/">注销</a>
+            <a href="#">修改密码</a>
+        </div>
+    </div>
+</div>
+<div class="cont_lt">
+    {% block cont_lt %}
+    {% endblock %}
+</div>
+<div class="cont_rt">
+    {% block cont_rt %}
+    {% endblock %}
+</div>
+</body>
+</html>

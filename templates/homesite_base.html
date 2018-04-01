@@ -1,0 +1,101 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{% static 'bs/css/bootstrap.css' %}">
+    <link rel="stylesheet" href="{% static 'css/homesite_base.css' %}">
+    {% block link_script %}
+    {% endblock %}
+    <script src="{% static 'bs/js/jquery-1.12.4.js' %}"></script>
+    <script src="{% static 'bs/js/bootstrap.js' %}"></script>
+    <script src="{% static 'kindeditor/kindeditor-all.js' %}"></script>
+    <title></title>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row">
+        {% block header %}
+            <div class="header">
+                <div class="row">
+                    <div class="col-md-2 col-md-offset-1"><a class="logo"
+                                                             href="/blog/{{ user.blog.site }}">{{ user.nickname }}</a>
+                    </div>
+                    <div class="col-md-4 col-md-offset-4">
+                        <ul class="nav nav-pills">
+                            <li role="presentation"><a href="/index/">博客园</a></li>
+                            <li role="presentation"><a href="/blog/{{ user.blog.site }}">首页</a></li>
+                            <li role="presentation"><a href="#">新随笔</a></li>
+                            <li role="presentation"><a href="#">联系</a></li>
+                            <li role="presentation"><a href="#">订阅</a></li>
+                            <li role="presentation"><a href="#">管理</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        {% endblock %}
+    </div>
+    <div class="row">
+        <div class="col-md-2">
+            {% block cont_left %}
+                <div class="panel panel-primary">
+                    <div class="panel-heading">公告</div>
+                    <div class="panel-body">
+                        <div class="nickname">昵称：<a href="/blog/{{ user.blog.site }}">{{ user.nickname }}</a></div>
+                        {% load my_tags %}
+                        <div class="blogage">园龄：<a
+                                href="">{{ user.create_time|date:'Y'|reverse_minus:cur_date.year }}</a>
+                        </div>
+                        <div class="fans">粉丝：<a href="">{{ user.fans.all.count }}</a></div>
+                        <div class="users">关注：<a href="">{{ user.users.all.count }}</a></div>
+                    </div>
+                </div>
+                <div class="panel panel-info">
+                    <div class="panel-heading">我的标签</div>
+                    <div class="panel-body">
+                        {% for tag in tags_list %}
+                            <div class=""><a
+                                    href="/blog/{{ user.blog.site }}/tag/{{ tag.1 }}">#&nbsp;{{ tag.0 }}&nbsp;({{ tag.2 }})</a>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="panel panel-warning">
+                    <div class="panel-heading">随笔分类</div>
+                    <div class="panel-body">
+                        {% for homecategory in homeCategory_list %}
+                            <div class=""><a
+                                    href="/blog/{{ user.blog.site }}/homecategory/{{ homecategory.1 }}">{{ homecategory.0 }}&nbsp;({{ homecategory.2 }})</a>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="panel panel-danger">
+                    <div class="panel-heading">阅读排行榜</div>
+                    <div class="panel-body">
+                        {% for article in top_three_article_list %}
+                            <div class=""><a
+                                    href="/blog/{{ user.blog.site }}/article/{{ article.nid }}">{{ article.title }}&nbsp;({{ article.read_count }})</a>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="panel panel-success">
+                    <div class="panel-heading">随笔档案</div>
+                    <div class="panel-body">
+                        {% for archive in archive_list %}
+                            <div class=""><a href="/blog/{{ user.blog.site }}/date/{{ archive.0 }}">{{ archive.0 }}&nbsp;({{ archive.1 }})</a>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endblock %}
+        </div>
+        <div class="col-md-10">
+            {% block cont_right %}
+            {% endblock %}
+        </div>
+    </div>
+</div>
+</body>
+</html>

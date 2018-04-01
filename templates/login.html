@@ -1,0 +1,85 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{% static 'bs/css/bootstrap.css' %}">
+    <script src="{% static 'bs/js/jquery-1.12.4.js' %}"></script>
+    <style>
+        .container {
+            margin-top: 100px;
+        }
+    </style>
+    <title>登录</title>
+</head>
+<body>
+<div class="container">
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+            <form>
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="user">用户名</label>
+                    <input type="text" class="form-control" id="user" placeholder="Username">
+                </div>
+                <div class="form-group">
+                    <label for="pwd">密码</label>
+                    <input type="password" class="form-control" id="pwd" placeholder="Password">
+                </div>
+                <div class="form-group">
+                    <label for="verification_code">验证码</label>
+                    <div class="row">
+                        <div class="col-md-7">
+                            <input type="text" class="form-control" id="verification_code"
+                                   placeholder="verification_code">
+                        </div>
+                        <div class="col-md-5">
+                            <img class="v_code" src="/get_verification_code/" alt="验证码" width="120" height="30"/>
+                            <a class="refresh">刷新</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <input id="login" type="button" class="btn btn-default" value="登录">
+                    <span id="errors"></span>
+                </div>
+                <div class="col-md-6">
+                    <a href="/reg/"><input type="button" class="btn btn-default" value="立即注册"></a>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+    $('.refresh').click(function () {
+        $('.v_code')[0].src += '?';
+    });
+    $('#login').click(function(){
+
+        var username=$("#user").val();
+        var password=$("#pwd").val();
+        var verification_code=$("#verification_code").val();
+        var csrf=$("[name='csrfmiddlewaretoken']").val();
+        $.ajax({
+            url:'/login/',
+            type:'POST',
+            data:{'username':username,'password':password,'verification_code':verification_code,'csrfmiddlewaretoken':csrf},
+            success:function(data){
+                data = JSON.parse(data);
+                if(data['user']){
+                    var next_path = '{{ request.GET.next_path }}';
+                    if(next_path.length==0){
+                        next_path = '/';
+                    }
+                    location.href = next_path;
+                }else{
+                    $('#errors').text(data['errors']).css({'color':'red','margin-left':'10px'});
+                }
+
+            }
+        })
+    });
+</script>
+</body>
+</html>

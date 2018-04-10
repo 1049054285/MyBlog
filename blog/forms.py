@@ -15,7 +15,7 @@ class RegForm(forms.Form):
     nickname = forms.CharField(max_length=16,widget=forms.TextInput(attrs={'class':'form-control','placeholder':'Nickname'}))
     verification_code = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','placeholder':'Verification_code'}))
 
-    def clean_verification_codxe(self):
+    def clean_verification_code(self):
         if self.request.session.get('verification_code').upper() == self.cleaned_data['verification_code'].upper():
             return self.cleaned_data['verification_code']
         else:

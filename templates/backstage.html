@@ -132,7 +132,6 @@
                 formData.append(col_name, col_value);
             });
             formData.append('id', edit_article_id);
-{#            var content = $('#article_content').val();#}
             var content = $('#article_content').html();
             formData.append('content', content);
             $.ajax({

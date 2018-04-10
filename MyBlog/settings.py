@@ -24,7 +24,7 @@ SECRET_KEY = ')$t9_u3f753qvf^httyn6l)ayt&q-$z2v55*6u7na&@g)+9)s*'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-ALLOWED_HOSTS = ['120.78.175.180','127.0.0.1','0.0.0.0']
+ALLOWED_HOSTS = ['120.78.175.180','127.0.0.1','0.0.0.0','linzetong.club']
 
 
 # Application definition
@@ -40,6 +40,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'django.middleware.cache.UpdateCacheMiddleware',  #全局缓存
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -47,7 +48,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.cache.FetchFromCacheMiddleware', #全局缓存
 ]
+CACHE_MIDDLEWARE_SECONDS = 5  #不设置默认300S
 
 ROOT_URLCONF = 'MyBlog.urls'
 
@@ -137,3 +140,15 @@ FUNCTION=[
     (3,"新闻"),
 
 ]
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',  #文件缓存
+        'LOCATION': os.path.join(BASE_DIR,'cache'),
+        'TIMEOUT': 300,                                               # 缓存超时时间（默认300，None表示永不过期，0表示立即过期）
+        'OPTIONS':{
+            'MAX_ENTRIES': 300,                                       # 最大缓存个数（默认300）
+            'CULL_FREQUENCY': 3,                                      # 缓存到达最大个数之后，剔除缓存个数的比例，即：1/CULL_FREQUENCY（默认3）
+        }
+    }
+}

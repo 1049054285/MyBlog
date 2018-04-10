@@ -265,7 +265,7 @@
       <column name="seq" sqlType="" precision="2000000000" scale="10" nullable="true" jdbcType="12"/>
     </table>
   </data-source>
-  <data-source name="db [2]" uuid="a5d794b0-49cc-4277-8217-aaf66c85d04d">
+  <data-source name="db [2]" uuid="c3544bdd-1a7d-456d-89e0-53f849480f30">
     <database-info product="SQLite" version="3.16.1" jdbc-version="2.1" driver-name="SQLiteJDBC" driver-version="native"/>
     <case-sensitivity plain-identifiers="mixed" quoted-identifiers="mixed"/>
     <schema name="" catalog=""/>

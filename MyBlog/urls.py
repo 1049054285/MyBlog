@@ -37,8 +37,6 @@ urlpatterns = [
     path('del_comment/', views.del_comment),
     path('comment_up/', views.comment_up),
     path('comment_up/', views.comment_up),
-    path('kind/upload_img/', views.upload_img),
-    path('kind/file_manager/', views.file_manager),
     # media 配置
     re_path('^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
 ]

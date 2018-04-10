@@ -155,9 +155,7 @@ def article_detail(request, user_site, article_id):
     comment_list_cur = p.get_page(cur_page)
     cur_page = comment_list_cur.number
     #处理 Comment_list 为可序列化列表
-    comment_list = []
-    for comment_obj in comment_list_cur:
-        comment_list.append(comment_obj)
+    comment_list = list(comment_list_cur)
     # 添加评论楼层数
     new_comment_list = []
     for i,comment_obj in enumerate(comment_list_cur,1):

@@ -148,7 +148,7 @@
             var title_str = "<h5><a class='art_title' href='/blog/{0}/article/{1}'>{2}</a></h5>".format(v['user__blog__site'], v['nid'], v['title']);
             var avatar_desc_row_str = "<div class='row'><div class='avatar_img col-md-1'><a href='/blog/{0}'><img src='/media/{1}' alt='' width='60' height='60'/></a></div><div class='desc col-md-10'>{2}</div></div>".format(v['user__blog__site'], v['user__avatar'], v['desc']);
             var info_row_str = "<div class='info'><a class='username' href='/blog/{0}'>{1}</a><span class='timer'>发布于{2}</span>&nbsp;&nbsp;<a href=''><span class='glyphicon glyphicon-comment'></span>&nbsp;<span>评论({3})</span></a><a href=''><span class='glyphicon glyphicon-eye-open'></span>&nbsp;<span>阅读({4})</span></a><a class='poll' article_id='{5}' href='###'><span class='glyphicon glyphicon-thumbs-up'></span>&nbsp;<span>赞(<span class='poll_num_{6}'>{7}</span>)</span></a><a href=''><span class='glyphicon glyphicon-thumbs-down'></span>&nbsp;<span>踩({8})</span></a><div class='errors_{9}'></div><div class='errors'></div></div>".format(v['user__blog__site'], v['user__nickname'], v['create_time'], v['comment_count'], v['read_count'], v['nid'], v['nid'], v['up_count'], v['down_count'], v['nid']);
-            article_item_str = article_item_str + article_item_str + title_str + avatar_desc_row_str + info_row_str + "</div><hr>";
+            article_item_str = article_item_str + title_str + avatar_desc_row_str + info_row_str + "</div><hr>";
             html += article_item_str;
         });
         return html;

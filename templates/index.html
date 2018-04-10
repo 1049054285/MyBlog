@@ -134,7 +134,7 @@
         var article_page_range_li = "";
         for (var i = 1; i <= article_num_pages; i++) {
             if (i == page) {
-                article_page_range_li += "<li><a id='cur_page_a_tag' style='color: red' page='{0}' href='###'>{1}</a></li>".format(i, i);
+                article_page_range_li += "<li class='active'><a id='cur_page_a_tag' page='{0}' href='###'>{1}</a></li>".format(i, i);
             } else if (i < 3 || i > article_num_pages - 2) {
                 article_page_range_li += "<li><a page='{0}' href='###'>{1}</a></li>".format(i, i);
             } else if (i <= (page + 1) && i >= (page - 1)) {

@@ -81,14 +81,7 @@
 
                 <p><input class="btn btn-primary submit_comment" id="submit_comment" type="button" value="提交评论"></p>
             </form>
-            <script>
-                var editor;
-                KindEditor.ready(function (K) {
-                    editor = K.create('#comment_cont', {
-                        urlType: 'domain'
-                    });
-                });
-            </script>
+
         {% else %}
             <div>注册用户登录后才能发表评论，请&nbsp;<a href="/login/?next_path={{ request.path }}">登录</a></div>
         {% endif %}
@@ -97,6 +90,14 @@
 
 {% endblock %}
 {% block script %}
+    <script>
+        var editor;
+        KindEditor.ready(function (K) {
+            editor = K.create('#comment_cont', {
+{#                urlType: 'domain'#}
+            });
+        });
+    </script>
     <script>
         String.prototype.format = function () {
             var args = arguments;

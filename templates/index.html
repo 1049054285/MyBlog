@@ -75,39 +75,6 @@
         <div class="col-md-7">
             {% csrf_token %}
             <div class="article_list">
-{#                {% for article in article_list %}#}
-{#                    <div class="article_item">#}
-{#                        <h5><a class="art_title"#}
-{#                               href="/blog/{{ article.user.blog.site }}/article/{{ article.nid }}">{{ article.title }}</a>#}
-{#                        </h5>#}
-{##}
-{#                        <div class="row">#}
-{#                            <div class="avatar_img col-md-1"><a href="/blog/{{ article.user.blog.site }}"><img#}
-{#                                    src="/media/{{ article.user.avatar }}" alt=""#}
-{#                                    width="60" height="60"/></a></div>#}
-{#                            <div class="desc col-md-10">{{ article.desc }}</div>#}
-{#                        </div>#}
-{#                        <div class="info">#}
-{#                            <a class="username"#}
-{#                               href="/blog/{{ article.user.blog.site }}">{{ article.user.nickname }}</a>#}
-{#                            <span class="timer">发布于{{ article.create_time|date:"Y-m-d H:i" }}</span>&nbsp;&nbsp;#}
-{#                            <a href=""><span#}
-{#                                    class="glyphicon glyphicon-comment"></span>&nbsp;<span>评论({{ article.comment_count }})</span></a>#}
-{#                            <a href=""><span#}
-{#                                    class="glyphicon glyphicon-eye-open"></span>&nbsp;<span>阅读({{ article.read_count }})</span></a>#}
-{#                            <a class="poll" article_id="{{ article.nid }}" href="###"><span#}
-{#                                    class="glyphicon glyphicon-thumbs-up"></span>&nbsp;<span>赞(<span#}
-{#                                    class="poll_num_{{ article.nid }}">{{ article.up_count }}</span>)</span></a>#}
-{#                            <a href=""><span#}
-{#                                    class="glyphicon glyphicon-thumbs-down"></span>&nbsp;<span>踩({{ article.down_count }})</span></a>#}
-{##}
-{#                            <div class="errors_{{ article.nid }}"></div>#}
-{#                            <div class="errors"></div>#}
-{#                        </div>#}
-{#                    </div>#}
-{#                    <hr>#}
-{#                {% endfor %}#}
-
             </div>
         </div>
         <div class="col-md-3">
@@ -191,6 +158,7 @@
                     'page': page
                 },
                 success: function (data) {
+                    console.log(data);
                     data = JSON.parse(data);
                     var article_item_str = Load_article(data['article_list']);
                     var pagination_str = Load_pagination(data['page'], data['article_num_pages']);
@@ -202,9 +170,13 @@
         }
     });
     $(function () {
+        var csrf = $("[name='csrfmiddlewaretoken']").val();
         $.ajax({
             url: '',
-            type: 'GET',
+            type: 'POST',
+            data: {
+                'csrfmiddlewaretoken': csrf
+            },
             success: function (data) {
                 data = JSON.parse(data);
                 var article_item_str = Load_article(data['article_list']);

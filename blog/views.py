@@ -24,7 +24,7 @@ def index(request):
     cur_page = comment_list_cur.number
     #处理 Comment_list 为可序列化列表
     article_list = list(comment_list_cur)
-
+    print(article_list)
     if request.is_ajax():
         response = {'article_list':article_list,'page':cur_page,'article_num_pages':p.num_pages}
         return HttpResponse(json.dumps(response))

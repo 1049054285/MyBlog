@@ -4,9 +4,6 @@
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="{% static 'bs/css/bootstrap.css' %}">
-    <script src="{% static 'kindeditor/kindeditor-all.js' %}"></script>
-    <script src="{% static 'bs/js/jquery-1.12.4.js' %}"></script>
-{#    <script src="{% static 'bs/js/jquery-1.12.4.js' %}"></script>#}
     <style>
         .container {
             margin-top: 10px;
@@ -87,13 +84,12 @@
                         allowImageUpload: true
                     });
                 }
-{#                KindEditor.create('#article_content', {#}
-{#                    urlType: 'domain'#}
-{#                });#}
             </script>
             {{ error_msg }}
         </div>
     </div>
 </div>
+<script src="{% static 'kindeditor/kindeditor-all.js' %}"></script>
+<script src="{% static 'bs/js/jquery-1.12.4.js' %}"></script>
 </body>
 </html>

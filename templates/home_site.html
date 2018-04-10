@@ -1,5 +1,5 @@
 {% extends 'homesite_base.html' %}
-{% block link_script %}
+{% block link %}
 {% load staticfiles %}
 <link rel="stylesheet" href="{% static 'css/home_site.css' %}">
 {% endblock %}
@@ -33,7 +33,9 @@
     {% csrf_token %}
     </div>
 </div>
-    <script>
+{% endblock %}
+{% block script %}
+<script>
     $('.poll').click(function () {
         var csrf=$("[name='csrfmiddlewaretoken']").val();
         var article_id = $(this).attr('article_id');
@@ -64,3 +66,4 @@
     });
 </script>
 {% endblock %}
+

@@ -5,8 +5,6 @@
     <meta charset="UTF-8">
     <link rel="stylesheet" href="{% static 'bs/css/bootstrap.css' %}">
     <link rel="stylesheet" href="{% static 'css/index.css' %}">
-    <script src="{% static 'bs/js/jquery-1.12.4.js' %}"></script>
-    <script src="{% static 'bs/js/bootstrap.js' %}"></script>
     <title></title>
 </head>
 <body>
@@ -99,7 +97,8 @@
         </div>
     </div>
 </div>
-</body>
+<script src="{% static 'bs/js/jquery-1.12.4.js' %}"></script>
+<script src="{% static 'bs/js/bootstrap.js' %}"></script>
 <script>
     String.prototype.format = function () {
         var args = arguments;
@@ -217,4 +216,6 @@
         {% endif %}
     });
 </script>
+</body>
+
 </html>

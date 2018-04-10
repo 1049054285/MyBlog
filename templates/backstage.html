@@ -75,6 +75,8 @@
         <div class="row hide model_edit"></div>
         <div class="cover hide"></div>
     </div>
+{% endblock %}
+{% block script %}
     <script>
         Array.prototype.contains = function ( needle ) {
           for (var i in this) {
@@ -293,67 +295,4 @@
             });
         });
     </script>
-    {#    <script>#}
-    {#        var $edit_tr_tag = '';#}
-    {#        var edit_book_id = '';#}
-    {#        $('.edit_btn').click(function () {#}
-    {#            var book_id = $(this).attr('book_id');#}
-    {#            $.ajax({#}
-    {#                url: "/book/edit_book/",#}
-    {#                type: 'GET',#}
-    {#                data: {'id': book_id},#}
-    {#                success: function (data) {#}
-    {#                    $('.model_edit').html(data);#}
-    {#                }#}
-    {#            });#}
-    {#            $('.model_edit').removeClass('hide');#}
-    {#            $('.cover').removeClass('hide');#}
-    {#            edit_book_id = book_id;#}
-    {#            $edit_tr_tag = $(this).parent().parent();#}
-    {#            console.log('set $edit_tr_tag:',$edit_tr_tag[0]);#}
-    {#        });#}
-    {#        $('.model_edit').delegate('button', 'click', function(){#}
-    {#            var formData = new FormData();#}
-    {#            $('.model_edit input').each(function(){#}
-    {#                var col_name = $(this).attr('name');#}
-    {#                var col_value = $(this).val();#}
-    {#                formData.append(col_name, col_value);#}
-    {#            });#}
-    {#            formData.append('id', edit_book_id);#}
-    {#            $.ajax({#}
-    {#                url: "/book/edit_book/",#}
-    {#                type: 'POST',#}
-    {#                data: formData,#}
-    {#                processData: false,#}
-    {#                contentType: false,#}
-    {#                success: function (formData) {#}
-    {#                    var formData = JSON.parse(formData);#}
-    {#                    for(var key in formData){#}
-    {#                        $($edit_tr_tag.find('td[name="' + key + '"]')).text(formData[key]);#}
-    {#                    }#}
-    {#                     edit_book_id = '';#}
-    {#                    $edit_tr_tag = '';#}
-    {#                }#}
-    {#            });#}
-    {#            $('.model_edit').addClass('hide');#}
-    {#            $('.cover').addClass('hide');#}
-    {#            $('.model_edit').html('');#}
-    {#        });#}
-    {#        $('.del_btn').click(function () {#}
-    {#            var book_id = $(this).attr('book_id');#}
-    {#            $.ajax({#}
-    {#                url: "/book/del_book/",#}
-    {#                type: 'GET',#}
-    {#                data: {#}
-    {#                    'page': {{ cur_page }},#}
-    {#                    'title': '{{ title }}',#}
-    {#                    'id': book_id#}
-    {#                },#}
-    {#                success: function (data) {#}
-    {#                    alert('删除书籍成功!');#}
-    {#                    $("body").html(data);#}
-    {#                }#}
-    {#            });#}
-    {#        });#}
-    {#    </script>#}
 {% endblock %}

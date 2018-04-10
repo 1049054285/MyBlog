@@ -4,9 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="{% static 'bs/css/bootstrap.css' %} "/>
-    <script src="{% static 'bs/js/jquery-1.12.4.js' %}"></script>
-    <script src="{% static 'bs/js/bootstrap.js' %}"></script>
-    <script src="{% static 'kindeditor/kindeditor-all-min.js' %}"></script>
+    {% block link %}
+    {% endblock %}
     <style>
         *{
             overflow: auto;
@@ -79,5 +78,10 @@
     {% block cont_rt %}
     {% endblock %}
 </div>
+<script src="{% static 'bs/js/jquery-1.12.4.js' %}"></script>
+<script src="{% static 'bs/js/bootstrap.js' %}"></script>
+<script src="{% static 'kindeditor/kindeditor-all-min.js' %}"></script>
+{% block script %}
+{% endblock %}
 </body>
 </html>

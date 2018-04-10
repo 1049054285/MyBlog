@@ -1,5 +1,5 @@
 {% extends 'homesite_base.html' %}
-{% block link_script %}
+{% block link %}
     {% load staticfiles %}
     <link rel="stylesheet" href="{% static 'css/article_detail.css' %}">
 {% endblock %}
@@ -45,7 +45,7 @@
 
             {% for num in p.page_range %}
                 {% if forloop.counter == cur_page %}
-                    <li><a id="cur_page_a_tag" style="color: red" article_id="{{ article.nid }}" page="{{ num }}"
+                    <li class="active"><a id="cur_page_a_tag" article_id="{{ article.nid }}" page="{{ num }}"
                            href="###">{{ num }}</a></li>
                 {% elif forloop.counter < 3 %}
                     <li><a article_id="{{ article.nid }}" page="{{ num }}" href="###">{{ num }}</a></li>
@@ -94,6 +94,9 @@
         {% endif %}
     </div>
 
+
+{% endblock %}
+{% block script %}
     <script>
         String.prototype.format = function () {
             var args = arguments;
@@ -151,7 +154,10 @@
         $(function () {
             $.ajax({
                 url: '',
-                type: 'GET',
+                type: 'POST',
+                data: {
+                    'csrfmiddlewaretoken': csrf
+                },
                 success: function (data) {
                     data = JSON.parse(data);
                     var comment_list = data['comment_list'];
@@ -176,7 +182,7 @@
             var comment_page_range_li = "";
             for (var i = 1; i <= comment_num_pages; i++) {
                 if (i == page) {
-                    comment_page_range_li += "<li><a a_type='1' id='cur_page_a_tag' style='color: red' article_id='{0}' page='{1}' href='###'>{2}</a></li>".format(article_id, i, i);
+                    comment_page_range_li += "<li class='active'><a a_type='1' id='cur_page_a_tag' article_id='{0}' page='{1}' href='###'>{2}</a></li>".format(article_id, i, i);
                 } else if (i < 3 || i > comment_num_pages - 2) {
                     comment_page_range_li += "<li><a a_type='1' article_id='{0}' page='{1}' href='###'>{2}</a></li>".format(article_id, i, i);
                 } else if (i <= (page + 1) && i >= (page - 1)) {
@@ -205,8 +211,8 @@
                         data = JSON.parse(data);
                         var comment_list = data['comment_list'];
                         var page = data['page'];
-                        $('#comment_get a[id="cur_page_a_tag"]').attr('id', '').css('color', '');
-                        $('#comment_get a[page="' + page + '"]').attr({'id': "cur_page_a_tag"}).css('color', 'red');
+                        $('#comment_get a[id="cur_page_a_tag"]').attr('id', '').parent().attr('class', 'active');
+                        $('#comment_get a[page="' + page + '"]').attr({'id': "cur_page_a_tag"}).parent().attr('class', 'active');
                         r = CommentTree(comment_list);
                         $('.comment_bar').html('');
                         $('.comment_bar').append(r);
